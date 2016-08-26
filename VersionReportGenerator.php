@@ -9,13 +9,11 @@ class VersionReportGenerator extends ReportGeneratorBase
   private $client_id = null;
   private $client_token = null;
   private $file = null;
-  private $repository = null;
 
   private $GIT_HUB_API = 'https://api.github.com/';
 
-  public function VersionReportGenerator($repository, $client_id = null, $client_token = null, $file = null)
+  public function VersionReportGenerator($client_id = null, $client_token = null, $file = null)
   {
-    $this->repository = $repository;
     if (!is_null($client_id) && !is_null($client_token)) {
       $this->sendCredentilas($client_id, $client_token);
     }
@@ -39,21 +37,39 @@ class VersionReportGenerator extends ReportGeneratorBase
     return true;
   }
 
+  public function getPulls($owner, $repository)
+  {
+    $this->curl($this->replace(
+      '/repos/:owner/:repo/pulls', [
+        ':repo' => $repository,
+        ':owner' => $owner
+      ])
+    );
+  }
+
+  private function replace($string, $array)
+  {
+    foreach ($array as $key => $value) {
+      $string = str_replace ($key, $value, $string);
+    }
+    return $string;
+  }
+
   private function curl($petition) {
     // create curl resource
     $curl = curl_init($this->GIT_HUB_API. $petition);
     curl_setopt($curl, CURLOPT_USERPWD, $this->client_id . ':' . $this->client_token);
     curl_setopt($curl, CURLOPT_USERAGENT,'Googlebot/2.1 (+http://www.google.com/bot.html)');
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $this->debug('Sending credentials...');
+    $this->debug('Sending petition... ' . $petition);
     $result = curl_exec($curl);
     if ($result == false) {
       throw new \Exception ('Bad credentials: ' . curl_error($curl));
+    } else {
+      $this->debug(json_decode($result));
+      curl_close($curl);
+      return $result;
     }
-    $this->debug(json_decode($result));
-    curl_close($curl);
-
-    return $result;
   }
 
   public function generateReport($file = null)
@@ -69,9 +85,10 @@ class VersionReportGenerator extends ReportGeneratorBase
 }
 
 try {
-  $report = new VersionReportGenerator('github-report-generator');
+  $report = new VersionReportGenerator();
   $report->setDebug(true);
-  $report->testCredentials('antoniojuansanchez', 'e33fbde1dbff67197bf3d9dab72a432a0945a62f');
+  $report->testCredentials('antoniojuansanchez', '723a8f32e7df86031963480538a1a19af4a35023');
+  $report->getPulls('antoniojuansanchez', 'github-report-generator');
 } catch(\Exception $e) {
   echo $e->getMessage();
 }
