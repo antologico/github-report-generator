@@ -12,10 +12,10 @@ class VersionReportGenerator extends ReportGeneratorBase
 
   private $GIT_HUB_API = 'https://api.github.com/';
 
-  public function VersionReportGenerator($client_id = null, $client_token = null, $file = null)
+  public function __construct($client_id = null, $client_token = null, $file = null)
   {
     if (!is_null($client_id) && !is_null($client_token)) {
-      $this->sendCredentilas($client_id, $client_token);
+      $this->setCredentials($client_id, $client_token);
     }
     $this->file = $file;
   }
@@ -24,7 +24,7 @@ class VersionReportGenerator extends ReportGeneratorBase
   {
     $this->client_id = $client_id;
     $this->client_token = $client_token;
-  }
+    }
 
   public function testCredentials($client_id=null, $client_token=null)
   {
@@ -33,16 +33,18 @@ class VersionReportGenerator extends ReportGeneratorBase
     if (is_null($this->client_token) || is_null($this->client_id)) {
       throw new \Exception ('Credentials not defined');
     }
-    $this->curl('user');
+    $this->curl($this->replace('users/:user',
+      [':user' => $this->client_id]));
     return true;
   }
 
-  public function getPulls($owner, $repository)
+  public function getPulls($owner, $repository, $branch)
   {
-    $this->curl($this->replace(
-      '/repos/:owner/:repo/pulls', [
+    return $this->curl($this->replace(
+      'repos/:owner/:repo/pulls?state=all&base=:branch', [
         ':repo' => $repository,
-        ':owner' => $owner
+        ':owner' => $owner,
+        ':branch' => $branch
       ])
     );
   }
@@ -61,8 +63,9 @@ class VersionReportGenerator extends ReportGeneratorBase
     curl_setopt($curl, CURLOPT_USERPWD, $this->client_id . ':' . $this->client_token);
     curl_setopt($curl, CURLOPT_USERAGENT,'Googlebot/2.1 (+http://www.google.com/bot.html)');
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $this->debug('Sending petition... ' . $petition);
+    $this->debug('Sending petition... ('. $this->client_id . ') ' . $petition);
     $result = curl_exec($curl);
+
     if ($result == false) {
       throw new \Exception ('Bad credentials: ' . curl_error($curl));
     } else {
@@ -83,16 +86,3 @@ class VersionReportGenerator extends ReportGeneratorBase
   }
 
 }
-
-try {
-  $report = new VersionReportGenerator();
-  $report->setDebug(true);
-  $report->testCredentials('antoniojuansanchez', '723a8f32e7df86031963480538a1a19af4a35023');
-  $report->getPulls('antoniojuansanchez', 'github-report-generator');
-} catch(\Exception $e) {
-  echo $e->getMessage();
-}
-
-echo "\n";
-
-?>
