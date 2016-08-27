@@ -1,0 +1,55 @@
+@import 'https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab';
+
+body {
+  padding-top: 20px;
+  max-width: 700px;
+  display: block;
+  margin: 0 auto;
+  text-align: left;
+  font-family: 'Open Sans', sans-serif;
+  color: #333;
+}
+
+h1, h2 {
+  font-family: 'Roboto Slab', serif;
+  color: #000;
+}
+
+h1 {
+  font-size: 3em;
+}
+
+h2 {
+  font-size: 1.2em;
+}
+
+html {
+  text-align: center;
+  background: #EEE;
+}
+
+hr {
+  margin: 20px 0;
+  border: 0px;
+  border-top: 2px solid #AAA;
+  width: 100%;
+}
+
+.feature {
+  font-size: 0.8em;
+  text-align: justify;
+}
+
+ul {
+  list-style-type: square;
+  padding: 0 40px;
+}
+
+a {
+  color: #600;
+  text-decoration: none;
+}
+
+a:hover {
+  color: red;
+}

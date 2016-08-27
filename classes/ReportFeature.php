@@ -12,6 +12,6 @@ class ReportFeature
   {
     $this->id = $id;
     $this->name = $name;
-    $this->description = $description;
+    $this->description = str_replace("\n", '<br />', $description);
   }
 }
