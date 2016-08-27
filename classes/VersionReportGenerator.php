@@ -38,12 +38,11 @@ class VersionReportGenerator extends ReportGeneratorBase
     return true;
   }
 
-  public function getPulls($owner, $repository, $branch)
+  public function getPulls($repository, $branch)
   {
     return $this->curl($this->replace(
-      'repos/:owner/:repo/pulls?state=all&base=:branch', [
+      'repos/:repo/pulls?state=all&base=:branch', [
         ':repo' => $repository,
-        ':owner' => $owner,
         ':branch' => $branch
       ])
     );

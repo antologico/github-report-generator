@@ -1,8 +1,12 @@
 <?php
 
 include_once 'classes/VersionReportGenerator.php';
+include_once 'classes/HTMLReportGenerator.php';
+include_once 'classes/ReportFeature.php';
 
 use GithubReportGenerator\VersionReportGenerator;
+use GithubReportGenerator\HTMLReportGenerator;
+use GithubReportGenerator\ReportFeature;
 
 try {
 
@@ -11,10 +15,16 @@ try {
     'password'   => null,
     'repository' => null,
     'branch'     => null,
+    'file'       => null,
+    'css'        => null
   ];
-var_dump($params);
 
-  echo "\ncall  :  'php console.php --user=userName --password=password --repository=reportName --branch=branchName'\n\n";
+  echo "\n [i] usage : php console.php --user=userName\n" .
+         "                             --password=password\n" .
+         "                             --repository=reportName\n" .
+         "                             --branch=branchName\n" .
+         "                             --file=report.html\n" .
+         "                             --css=css-sample.css\n\n";
 
   if (count($argv) - 1 != count($params)) {
     throw new \Exception("Incorrect number of params", 1);
@@ -37,9 +47,16 @@ var_dump($params);
   $report = new VersionReportGenerator($params['username'], $params['password']);
   $report->setDebug(false);
   $report->testCredentials();
-  $results = $report->getPulls($params['username'], $params['repository'], $params['branch']);
+  $results = $report->getPulls($params['repository'], $params['branch']);
 
-  print_r($results);
+  $features = [];
+  foreach (json_decode($results) as $result) {
+    $features[] = new ReportFeature($result->id, $result->title, $result->body);
+  }
+
+  $htmlFile = new HTMLReportGenerator($params['branch'], $params['css'], $features);
+  $htmlFile->generateReport($params['file']);
+  echo "\n [i] Correctly finish\n\n";
 
 } catch(\Exception $e) {
   echo '[!] ' . $e->getMessage();
